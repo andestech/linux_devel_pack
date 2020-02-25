@@ -1,3 +1,3 @@
-[submodule "linux"]
-	path = linux
+[submodule "linux-4.17"]
+	path = linux-4.17
 	url = https://github.com/andestech/linux.git
