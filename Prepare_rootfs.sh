@@ -73,8 +73,8 @@ if [ ! -f "$TAR_PATH/busybox.tgz" ]  || [ ! -f "$TAR_PATH/rootfs.tgz" ]; then
         exit
     else
         pushd $TAR_PATH
-        tar cvfz rootfs.tgz ./rootfs
-        tar cvfz busybox.tgz ./busybox
+        tar cfz rootfs.tgz ./rootfs
+        tar cfz busybox.tgz ./busybox
 	popd
     fi
 fi
@@ -119,9 +119,9 @@ copy_library()
             continue
         else
 		if [ "$(echo ${ARCH} | grep v5d)y" = "y" ]; then
-                search_name='imacxv5'
+                search_name='imacxandes'
             else
-                search_name='imafdcxv5'
+                search_name='imafdcxandes'
             fi
 
             echo $line | grep -q "$search_name"
@@ -147,6 +147,8 @@ copy_library()
     sysroot_usr_sbin=sysroot/usr/sbin
 
     echo "start to copy library"
+    echo "cp -arf $CROSS_FOLDER/lib/ld* $DISK_PATH/$library_name/"
+    cp -arf $CROSS_FOLDER/lib/ld* $DISK_PATH/$library_name/
     echo "cp -arf $CROSS_FOLDER/$sysroot_lib/* $DISK_PATH/lib/"
     cp -arf $CROSS_FOLDER/$sysroot_lib/* $DISK_PATH/lib/
     echo "cp -arf $CROSS_FOLDER/$sysroot_liby/* $DISK_PATH/$library_name/"
@@ -155,8 +157,6 @@ copy_library()
     echo "cp -arf $CROSS_FOLDER/$sysroot_usr_liby/* $DISK_PATH/usr/$library_name/"
     cp -arf $CROSS_FOLDER/$sysroot_usr_liby/* $DISK_PATH/usr/$library_name/
     rm -f $DISK_PATH/usr/$library_name/*.a
-    echo "cp -arf $CROSS_FOLDER/lib/* $DISK_PATH/$library_name/"
-    cp -arf $CROSS_FOLDER/lib/* $DISK_PATH/$library_name/
     echo "cp -arf $CROSS_FOLDER/$sysroot_sbin/* $DISK_PATH/sbin/"
     cp -arf $CROSS_FOLDER/$sysroot_sbin/* $DISK_PATH/sbin/
     echo "cp -arf $CROSS_FOLDER/$sysroot_usr_bin/* $DISK_PATH/usr/bin/"

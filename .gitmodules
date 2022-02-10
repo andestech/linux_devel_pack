@@ -1,9 +1,3 @@
-[submodule "linux-4.17"]
-	path = linux-4.17
-	url = https://github.com/andestech/linux.git
-[submodule "BBL"]
-	path = BBL
-	url = https://github.com/andestech/BBL.git
 [submodule "busybox"]
 	path = busybox
 	url = https://github.com/andestech/busybox.git
@@ -22,6 +16,18 @@
 [submodule "strace"]
 	path = strace
 	url = https://github.com/andestech/strace.git
-[submodule "u-boot-riscv"]
-	path = u-boot-riscv
+[submodule "linux-5.4"]
+	path = linux-5.4
+	url = https://github.com/andestech/linux.git
+[submodule "u-boot"]
+	path = u-boot
 	url = https://github.com/andestech/uboot.git
+[submodule "opensbi"]
+	path = opensbi
+	url = https://github.com/andestech/opensbi.git
+[submodule "mtd"]
+	path = mtd
+	url = https://github.com/andestech/mtd.git
+[submodule "fbtest"]
+	path = fbtest
+	url = https://github.com/andestech/fbtest.git
