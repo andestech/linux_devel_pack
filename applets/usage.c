@@ -48,8 +48,10 @@ int main(void)
 	qsort(usage_array,
 		num_messages, sizeof(usage_array[0]),
 		compare_func);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
 	for (i = 0; i < num_messages; i++)
 		write(STDOUT_FILENO, usage_array[i].usage, strlen(usage_array[i].usage) + 1);
-
+#pragma GCC diagnostic pop
 	return 0;
 }
