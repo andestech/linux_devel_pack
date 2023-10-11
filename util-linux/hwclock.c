@@ -131,6 +131,7 @@ static void show_clock(const char **pp_rtcname, int utc)
 
 static void set_kernel_tz(const struct timezone *tz)
 {
+	int ret = 1;
 #if LIBC_IS_MUSL
 	/* musl libc does not pass tz argument to syscall
 	 * because "it's deprecated by POSIX, therefore it's fine
@@ -139,9 +140,11 @@ static void set_kernel_tz(const struct timezone *tz)
 #if !defined(SYS_settimeofday) && defined(SYS_settimeofday_time32)
 # define SYS_settimeofday SYS_settimeofday_time32
 #endif
-	int ret = syscall(SYS_settimeofday, NULL, tz);
+#if defined(SYS_settimeofday)
+	ret = syscall(SYS_settimeofday, NULL, tz);
+#endif
 #else
-	int ret = settimeofday(NULL, tz);
+	ret = settimeofday(NULL, tz);
 #endif
 	if (ret)
 		bb_simple_perror_msg_and_die("settimeofday");
