@@ -113,7 +113,7 @@ else
     export LDFLAGS="-march=${ARCH}"
     export CFLAGS="-march=${ARCH}"
 fi
-if [ "${CPU}" != "25" ] && [ "${CPU}" != "45" ]; then
+if [ "${CPU}" != "25" ] && [ "${CPU}" != "45" ] ; then
     echo ""
     echo "!! Error: please check if the specified cpu is [25|45]"
     echo ""
@@ -132,51 +132,43 @@ create_root()
 copy_library()
 {
     # check and library path
-    multi_lib_path=`$CC -print-multi-lib`
-    libc_path=`$CC -print-file-name=libc.a`
-    for line in $multi_lib_path; do
-        if [ "$line" == ".;" ]; then
-            continue
-        else
-            if [ "$(echo ${ARCH} | grep v5d)y" = "y" ]; then
-                search_name='imacxandes'
-            else
-                search_name='imafdcxandes'
-            fi
+    declare -A dict=(
+        [rv32v5]=lib32/ilp32
+        [rv32v5d]=lib32/ilp32d
+        [rv64v5]=lib64/lp64
+        [rv64v5d]=lib64/lp64d
+    )
 
-            echo $line | grep -q "$search_name"
-            if [ "$?" -eq ""0 ]; then
-                echo $line |grep -q "45"
-                tmp=$?
-                # === cpu 45 ===
-                if [ "$tmp" -eq ""0 ] && [ "$CPU" == "45" ]; then
-                    library_path=${libc_path%/usr/*}
-                    library_name=${line%;@*}
-                    dest_name=${line%/mtune*}
-                # === cpu 25 ===
-                elif [ "$tmp" -eq ""1 ] && [ "$CPU" == "25" ]; then
-                    library_path=${libc_path%/usr/*}
-                    library_name=${line%;@*}
-                    dest_name=${line%;@*}
-                else
-                    continue
-                fi
-            fi
+    declare -A dict2=(
+        [45]=/mtune-andes-45-series
+    )
+
+    for library in "${!dict[@]}"
+    do
+        if [ "$library" == "$ARCH" ]; then
+            src_library_name=${dict[$library]}
+            dest_name=${dict[$library]}
         fi
     done
+
+    for series in "${!dict2[@]}"
+    do
+        if [ "$series" == "$CPU" ]; then
+            src_library_name="$src_library_name${dict2[$series]}"
+        fi
+     done
 
     CROSS_FOLDER=$TOOLCHAIN_PATH
     DISK_PATH=$RAMDISK_PATH/rootfs/disk
     sysroot_lib=sysroot/lib
-    sysroot_liby=sysroot/$library_name
-    sysroot_usr_liby=sysroot/usr/$library_name
+    sysroot_liby=sysroot/$src_library_name
+    sysroot_usr_liby=sysroot/usr/$src_library_name
     sysroot_sbin=sysroot/sbin
     sysroot_usr_bin=sysroot/usr/bin
     sysroot_usr_sbin=sysroot/usr/sbin
 
     echo "start to copy library"
-    echo "cp -arf $CROSS_FOLDER/sysroot/lib/ld* $DISK_PATH/$dest_name/"
-    cp -arf $CROSS_FOLDER/sysroot/lib/ld*  $DISK_PATH/$dest_name/
+    echo "copy library from $src_library_name to $dest_name"
     echo "cp -arf $CROSS_FOLDER/$sysroot_lib/* $DISK_PATH/lib/"
     cp -arf $CROSS_FOLDER/$sysroot_lib/* $DISK_PATH/lib/
     echo "cp -arf $CROSS_FOLDER/$sysroot_liby/* $DISK_PATH/$dest_name/"
@@ -195,10 +187,47 @@ copy_library()
         rm -rf $DISK_PATH/$dest_name/mtune*
         rm -rf $DISK_PATH/usr/$dest_name/mtune*
     fi
-    if [ ${CPU} == "45" ]; then
-        ln -fs . $DISK_PATH/$library_name
+    if [ ${CPU} != "25" ]; then
+        ln -fs . $DISK_PATH/$src_library_name
     fi
-    echo "===== copy library done! ====="
+    echo "===== copy library done ====="
+}
+
+create_ld_link()
+{
+    echo "===== create link start ====="
+    declare -A dict3=(
+        [rv32v5-45]=ld-linux-riscv32-ilp32_andes-45-series.so.1
+        [rv32v5d-45]=ld-linux-riscv32-ilp32d_andes-45-series.so.1
+        [rv64v5-45]=ld-linux-riscv64-lp64_andes-45-series.so.1
+        [rv64v5d-45]=ld-linux-riscv64-lp64d_andes-45-series.so.1
+    )
+
+    declare -A dict4=(
+        [rv32v5d]=ld-linux-riscv32-ilp32d.so.1
+        [rv32v5]=ld-linux-riscv32-ilp32.so.1
+        [rv64v5]=ld-linux-riscv64-lp64.so.1
+        [rv64v5d]=ld-linux-riscv64-lp64d.so.1
+    )
+
+    for target_item in "${!dict3[@]}"
+    do
+        if [ "$target_item" == "$ARCH-$CPU" ]; then
+            target_link=${dict3[$target_item]}
+        fi
+    done
+    for link_item in "${!dict4[@]}"
+    do
+        if [ "$link_item" == "$ARCH" ]; then
+            link_name=${dict4[$link_item]}
+        fi
+    done
+
+    if [ "$CPU" != "25"  ]; then
+        echo "create ld link : $link_name -> $target_link"
+        ln -fs $target_link $DISK_PATH/lib/$link_name
+    fi
+    echo "===== create link done ====="
 }
 
 strip_program()
@@ -221,6 +250,7 @@ build_busybox(){
 # ===== Preparing root file system =====
 create_root
 copy_library
+create_ld_link
 strip_program
 build_busybox
 echo "===== Prepar root fild system done! ======"

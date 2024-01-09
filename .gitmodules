@@ -1,5 +1,5 @@
 [submodule "linux-4.17"]
-	path = linux-5.4
+	path = linux
 	url = https://github.com/andestech/linux.git
 [submodule "busybox"]
 	path = busybox
