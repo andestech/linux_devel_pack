@@ -4,9 +4,6 @@
 [submodule "busybox"]
 	path = busybox
 	url = https://github.com/andestech/busybox.git
-[submodule "gdb"]
-	path = gdb
-	url = https://github.com/andestech/gdb.git
 [submodule "iperf"]
 	path = iperf
 	url = https://github.com/andestech/iperf.git
@@ -25,3 +22,6 @@
 [submodule "opensbi"]
 	path = opensbi
 	url = https://github.com/andestech/opensbi.git
+[submodule "binutils"]
+	path = binutils
+	url = https://github.com/andestech/binutils.git
