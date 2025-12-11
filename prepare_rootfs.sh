@@ -26,6 +26,9 @@ for var in $@; do
         --arch=*)
             ARCH=${var#*=}
             ;;
+        --zce)
+            MEXT_ZC="-mext-zc"
+            ;;
         --help)
              echo ""
              echo "[[ help message ]]"
@@ -37,6 +40,7 @@ for var in $@; do
              echo "--ramdisk_root_path=  Specify a dir to contain files for building root file system. (Default: \$PWD/ramdisk)"
              echo "--tar_file_path=      Specify a dir that contains busybox and rootfs directory or tarball(tgz). (Default: \$PWD)"
              echo "--arch=rv[32|64][v5|v5d]         Specify the architecture. (Default: rv32v5d)"
+             echo "--zce                 Specify this option to build rootfs for bitmaps that support Zce extension. "
              exit 0
              ;;
         *)
@@ -104,8 +108,8 @@ if [ "${ARCH}" != "rv32v5" ] && [ "${ARCH}" != "rv32v5d" ] && [ "${ARCH}" != "rv
     echo ""
     exit
 else
-    export LDFLAGS="-march=${ARCH}"
-    export CFLAGS="-march=${ARCH}"
+    export LDFLAGS="-march=${ARCH} ${MEXT_ZC}"
+    export CFLAGS="-march=${ARCH} ${MEXT_ZC}"
 fi
 
 create_root()
